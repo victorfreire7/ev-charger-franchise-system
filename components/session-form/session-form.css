@@ -1,0 +1,85 @@
+.modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-8);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: 28rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.modal-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-3);
+}
+
+.card-read-row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-3);
+}
+
+.card-read-row .form-select {
+  flex: 1;
+}
+
+.card-read-result {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-3);
+  align-items: center;
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  font-size: var(--text-sm);
+  min-height: 1.5em;
+}
+
+.card-read-result .crr-name {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.card-read-result .crr-tag {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--color-accent-dim);
+  color: var(--color-accent);
+}
+
+.card-read-result .crr-empty {
+  color: var(--color-text-muted);
+}
