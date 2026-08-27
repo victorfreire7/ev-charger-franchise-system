@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thunderbolt · Acesso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/reset.css">
+  <link rel="stylesheet" href="css/base/animations.css">
+  <link rel="stylesheet" href="css/base/buttons.css">
+  <link rel="stylesheet" href="css/base/forms.css">
+
+  <style>
+    /* ── Layout ─────────────────────────────────────────── */
+    body {
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--color-bg);
+    }
+
+    /* Grid decorativo de fundo */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--color-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.25;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Brilho central verde */
+    body::after {
+      content: "";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--color-accent-dim) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Card central ────────────────────────────────────── */
+    .auth-card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+      animation: fadeIn 0.3s ease both;
+    }
+
+    /* ── Brand ───────────────────────────────────────────── */
+    .auth-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .auth-brand-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .auth-brand-name {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-text);
+      letter-spacing: 0.02em;
+    }
+
+    .auth-brand-name span {
+      color: var(--color-accent);
+    }
+
+    .auth-brand-sub {
+      font-size: var(--text-xs);
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+
+    /* ── Tabs ─────────────────────────────────────────────── */
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-1);
+      gap: var(--space-1);
+    }
+
+    .auth-tab {
+      padding: var(--space-2) var(--space-4);
+      border-radius: calc(var(--radius-md) - 2px);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      user-select: none;
+    }
+
+    .auth-tab.active {
+      background: var(--color-surface);
+      color: var(--color-accent);
+      border: 1px solid var(--color-border);
+    }
+
+    /* ── Panels ───────────────────────────────────────────── */
+    .auth-panel {
+      display: none;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .auth-panel.active {
+      display: flex;
+      animation: fadeIn 0.2s ease both;
+    }
+
+    /* ── Feedback ─────────────────────────────────────────── */
+    .auth-feedback {
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      display: none;
+    }
+
+    .auth-feedback.error {
+      display: block;
+      background: rgba(255, 77, 109, 0.1);
+      border: 1px solid var(--color-danger);
+      color: var(--color-danger);
+    }
+
+    .auth-feedback.success {
+      display: block;
+      background: rgba(0, 229, 160, 0.1);
+      border: 1px solid var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    /* ── Separador de campo ───────────────────────────────── */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+
+    /* ── Input com ícone ──────────────────────────────────── */
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap .form-input {
+      width: 100%;
+      padding-left: var(--space-8);
+    }
+
+    .input-icon {
+      position: absolute;
+      left: var(--space-3);
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.85rem;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    /* Toggle senha visível */
+    .input-toggle {
+      position: absolute;
+      right: var(--space-3);
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+    }
+
+    .input-toggle:hover { color: var(--color-accent); }
+
+    /* ── Strength bar (cadastro) ──────────────────────────── */
+    .strength-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .strength-bar-track {
+      height: 3px;
+      background: var(--color-border);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .strength-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: var(--radius-full);
+      transition: width 0.25s ease, background 0.25s ease;
+    }
+
+    .strength-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-align: right;
+    }
+
+    /* ── Footer do card ───────────────────────────────────── */
+    .auth-footer {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ── Botão full-width ─────────────────────────────────── */
+    .btn-full {
+      width: 100%;
+    }
+
+    /* ── Acento no label ──────────────────────────────────── */
+    .label-accent {
+      color: var(--color-accent);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .label-accent:hover { opacity: 0.8; }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+
+    <!-- Brand -->
+    <div class="auth-brand">
+      <div class="auth-brand-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <span class="auth-brand-name">Thunder<span>bolt</span></span>
+      <span class="auth-brand-sub">Painel do Franqueado · GoodWe</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Entrar</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Cadastrar</div>
+    </div>
+
+    <!-- ── Painel: Login ── -->
+    <div class="auth-panel active" id="panel-login">
+
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+          <input class="form-input" id="login-email" type="email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <label class="form-label">Senha</label>
+          <span class="label-accent" onclick="switchTab('register')">Criar conta</span>
+        </div>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+          <span class="input-toggle" onclick="togglePassword('login-password', this)">mostrar</span>
+        </div>
+      </div>
+
+      <div class="auth-feedback" id="login-feedback"></div>
+
+      <button class="btn btn-primary btn-full" onclick="handleLogin()">Entrar no painel</button>
+
+    </div>
+
+    <!-- ── Painel: Cadastro ── -->
+    <div class="auth-panel" id="panel-register">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome</label>
+          <div class="input-wrap">
+            <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+            <input class="form-input" id="reg-name" type="text" placeholder="Nome" autocomplete="given-name">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sobrenome</label>
+          <div class="input-wrap">
+            <input class="form-input" id="reg-surname" type="text" placeholder="Sobrenome" autocomplete="family-name">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+          <input class="form-input" id="reg-email" type="email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Franquia / Nome do Posto</label>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+          <input class="form-input" id="reg-franchise" type="text" placeholder="ex: ChargePoint Zona Sul">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input class="form-input" id="reg-password" type="password" placeholder="mín. 8 caracteres" oninput="updateStrength(this.value)" autocomplete="new-password">
+          <span class="input-toggle" onclick="togglePassword('reg-password', this)">mostrar</span>
+        </div>
+        <div class="strength-bar-wrap">
+          <div class="strength-bar-track">
+            <div class="strength-bar-fill" id="strength-fill"></div>
+          </div>
+          <span class="strength-label" id="strength-label"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirmar Senha</label>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input class="form-input" id="reg-confirm" type="password" placeholder="repita a senha" autocomplete="new-password">
+          <span class="input-toggle" onclick="togglePassword('reg-confirm', this)">mostrar</span>
+        </div>
+      </div>
+
+      <div class="auth-feedback" id="register-feedback"></div>
+
+      <button class="btn btn-primary btn-full" onclick="handleRegister()">Criar conta</button>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="auth-footer">
+      GoodWe EV Challenge 2026 · FIAP<br>
+      Dados armazenados localmente neste dispositivo.
+    </div>
+
+  </div>
+
+  <script>
+    // ── Storage ─────────────────────────────────────────────
+    const STORAGE_KEY = "thunderbolt_users";
+
+    function getUsers() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+    }
+
+    // Hash simples (não é criptografia real — adequado para PoC sem backend)
+    async function hashPassword(password) {
+      const buf = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(password)
+      );
+      return Array.from(new Uint8Array(buf))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    // ── Tabs ────────────────────────────────────────────────
+    function switchTab(tab) {
+      document.getElementById("tab-login").classList.toggle("active", tab === "login");
+      document.getElementById("tab-register").classList.toggle("active", tab === "register");
+      document.getElementById("panel-login").classList.toggle("active", tab === "login");
+      document.getElementById("panel-register").classList.toggle("active", tab === "register");
+      clearFeedback();
+    }
+
+    // ── Feedback ────────────────────────────────────────────
+    function showFeedback(id, message, type) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.className = "auth-feedback " + type;
+    }
+
+    function clearFeedback() {
+      ["login-feedback", "register-feedback"].forEach(id => {
+        const el = document.getElementById(id);
+        el.className = "auth-feedback";
+        el.textContent = "";
+      });
+    }
+
+    // ── Toggle senha ─────────────────────────────────────────
+    function togglePassword(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const isHidden = input.type === "password";
+      input.type = isHidden ? "text" : "password";
+      btn.textContent = isHidden ? "ocultar" : "mostrar";
+    }
+
+    // ── Strength bar ─────────────────────────────────────────
+    function updateStrength(password) {
+      let score = 0;
+      if (password.length >= 8)  score++;
+      if (password.length >= 12) score++;
+      if (/[A-Z]/.test(password)) score++;
+      if (/[0-9]/.test(password)) score++;
+      if (/[^A-Za-z0-9]/.test(password)) score++;
+
+      const fill   = document.getElementById("strength-fill");
+      const label  = document.getElementById("strength-label");
+      const levels = [
+        { pct: "0%",   color: "var(--color-border)",  text: "" },
+        { pct: "25%",  color: "var(--color-danger)",  text: "Fraca" },
+        { pct: "50%",  color: "var(--color-warning)", text: "Razoável" },
+        { pct: "75%",  color: "var(--color-warning)", text: "Boa" },
+        { pct: "90%",  color: "var(--color-accent)",  text: "Forte" },
+        { pct: "100%", color: "var(--color-accent)",  text: "Muito forte" },
+      ];
+      const lvl = levels[Math.min(score, 5)];
+      fill.style.width      = password.length ? lvl.pct : "0%";
+      fill.style.background = lvl.color;
+      label.textContent     = password.length ? lvl.text : "";
+    }
+
+    // ── Login ────────────────────────────────────────────────
+    async function handleLogin() {
+      const email    = document.getElementById("login-email").value.trim().toLowerCase();
+      const password = document.getElementById("login-password").value;
+
+      if (!email || !password) {
+        showFeedback("login-feedback", "Preencha todos os campos.", "error");
+        return;
+      }
+
+      const users = getUsers();
+      const user  = users.find(u => u.email === email);
+
+      if (!user) {
+        showFeedback("login-feedback", "Conta não encontrada.", "error");
+        return;
+      }
+
+      const hash = await hashPassword(password);
+      if (hash !== user.passwordHash) {
+        showFeedback("login-feedback", "Senha incorreta.", "error");
+        return;
+      }
+
+      // Salva sessão e redireciona
+      sessionStorage.setItem("thunderbolt_session", JSON.stringify({
+        email: user.email,
+        name:  user.name,
+        franchise: user.franchise,
+      }));
+
+      showFeedback("login-feedback", "Acesso autorizado. Redirecionando…", "success");
+      setTimeout(() => { window.location.href = "index.html"; }, 900);
+    }
+
+    // ── Cadastro ─────────────────────────────────────────────
+    async function handleRegister() {
+      const name      = document.getElementById("reg-name").value.trim();
+      const surname   = document.getElementById("reg-surname").value.trim();
+      const email     = document.getElementById("reg-email").value.trim().toLowerCase();
+      const franchise = document.getElementById("reg-franchise").value.trim();
+      const password  = document.getElementById("reg-password").value;
+      const confirm   = document.getElementById("reg-confirm").value;
+
+      if (!name || !surname || !email || !franchise || !password || !confirm) {
+        showFeedback("register-feedback", "Preencha todos os campos.", "error");
+        return;
+      }
+
+      const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRx.test(email)) {
+        showFeedback("register-feedback", "E-mail inválido.", "error");
+        return;
+      }
+
+      if (password.length < 8) {
+        showFeedback("register-feedback", "A senha precisa ter pelo menos 8 caracteres.", "error");
+        return;
+      }
+
+      if (password !== confirm) {
+        showFeedback("register-feedback", "As senhas não coincidem.", "error");
+        return;
+      }
+
+      const users = getUsers();
+      if (users.find(u => u.email === email)) {
+        showFeedback("register-feedback", "Este e-mail já está cadastrado.", "error");
+        return;
+      }
+
+      const passwordHash = await hashPassword(password);
+      users.push({
+        email,
+        name: name + " " + surname,
+        franchise,
+        passwordHash,
+        createdAt: new Date().toISOString(),
+      });
+      saveUsers(users);
+
+      showFeedback("register-feedback", "Conta criada com sucesso! Faça login para continuar.", "success");
+
+      // Limpa campos e troca para aba de login após 1.2s
+      setTimeout(() => {
+        document.getElementById("reg-name").value      = "";
+        document.getElementById("reg-surname").value   = "";
+        document.getElementById("reg-email").value     = "";
+        document.getElementById("reg-franchise").value = "";
+        document.getElementById("reg-password").value  = "";
+        document.getElementById("reg-confirm").value   = "";
+        updateStrength("");
+        document.getElementById("login-email").value   = email;
+        switchTab("login");
+      }, 1200);
+    }
+
+    // ── Enter para submeter ───────────────────────────────────
+    document.addEventListener("keydown", e => {
+      if (e.key !== "Enter") return;
+      const loginActive = document.getElementById("panel-login").classList.contains("active");
+      if (loginActive) handleLogin();
+      else handleRegister();
+    });
+  </script>
+</body>
+</html>
